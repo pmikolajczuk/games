@@ -19,15 +19,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Main extends Application {
 
     private static final int TILE_SIZE = 100;
-    private static final int BOARD_SIZE = 5;
+    private static final int BOARD_SIZE = 3;
 
     private boolean playable = true;
     private boolean turnX = true;
@@ -84,16 +81,51 @@ public class Main extends Application {
     }
 
     private void checkState() {
-        Optional<Combo> winner = combos
-                .stream()
+        combos.stream()
                 .filter(Combo::isComplete)
-                .findAny();
-
-        if (winner.isPresent()) {
+                .findFirst()
+                .ifPresentOrElse(this::handleWin, this::checkForDraw);
+    }
+    
+    private void handleWin(Combo winner) {
+        playable = false;
+        drawWinningLine(winner);
+        System.out.println(winner.getWinnerSymbol() + " won!");
+    }
+    
+    private void checkForDraw() {
+        if (isDraw()) {
             playable = false;
-            drawWinningLine(winner.get());
-            System.out.println(winner.get().getWinner() + " won!");
+            System.out.println("It's a Draw!");
         }
+    }
+
+    private boolean isDraw() {
+        return getEmptyTiles().isEmpty();
+    }
+
+    private void computerMove() {
+        if (!playable) {
+            return;
+        }
+        Tile tile = findRandomFreeTile();
+        tile.drawO();
+        checkState();
+        turnX = true;
+    }
+
+    private Tile findRandomFreeTile() {
+        List<Tile> emptyTiles = getEmptyTiles();
+        Random random =  new Random();
+        int next = random.nextInt(emptyTiles.size());
+        return emptyTiles.get(next);
+    }
+    
+    private List<Tile> getEmptyTiles() {
+        return Arrays.stream(board)
+                .flatMap(Arrays::stream)
+                .filter(Tile::isEmpty)
+                .toList();
     }
 
     private void drawWinningLine(Combo combo) {
@@ -132,7 +164,7 @@ public class Main extends Application {
                     .allMatch(tile -> tiles[0].getValue().equals(tile.getValue()));
         }
 
-        public String getWinner() {
+        public String getWinnerSymbol() {
             return tiles[0].getValue();
         }
     }
@@ -157,15 +189,11 @@ public class Main extends Application {
 
                 if (turnX && isEmpty() && event.getButton() == MouseButton.PRIMARY) {
                     drawX();
+                    checkState();
                     turnX = false;
-                    checkState();
-
-                } else if (!turnX && isEmpty() && event.getButton() == MouseButton.SECONDARY) {
-                    drawO();
-                    turnX = true;
-                    checkState();
+                    computerMove();
                 }
-             });
+            });
         }
 
         public double getCenterX() {
