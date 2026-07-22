@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class VirtualBoard extends AbstractBoard<VirtualBoard.VirtualTile> {
@@ -12,32 +11,46 @@ public class VirtualBoard extends AbstractBoard<VirtualBoard.VirtualTile> {
         super.init(VirtualTile.class, new TileBuilder(from));
     }
 
-    public Pair<Integer, Integer> findBestMove() {
-        for (VirtualTile emptyTile : getEmptyTiles()) {
-            emptyTile.setValue(COMPUTER_SYMBOL);
-            BoardState boardState = checkState();
-            switch (boardState) {
-                case O_WON, DRAW:
-                    return Pair.of(emptyTile.getY(), emptyTile.getX());
-                case NONE:
-                    emptyTile.clearValue();
+    public Pair<Integer, Integer> computerMove() {
+        for (VirtualTile tile : getEmptyTiles()) {
+            tile.setValue(COMPUTER_SYMBOL);
+            if (checkWinner() || isDraw()) {
+                tile.clearValue();
+                return Pair.of(tile.getY(), tile.getX());
+            }
+
+            if (playerMove() == 1) {
+                tile.clearValue();
+                continue;
+            } else {
+                tile.clearValue();
+                return Pair.of(tile.getY(), tile.getX());
             }
         }
-        return findRandomMove();
+        return null;
     }
 
-    private BoardState checkState() {
-        Optional<Combo> winner = combos.stream()
-                .filter(Combo::isComplete)
-                .findFirst();
+    private int playerMove() {
+        for (VirtualTile tile : getEmptyTiles()) {
+            tile.setValue(PLAYER_SYMBOL);
+            if (checkWinner()) {
+                tile.clearValue();
+                return 1;
+            }
 
-        if (winner.isPresent()) {
-            return BoardState.O_WON;
-        } else if (isDraw()){
-            return BoardState.DRAW;
-        } else {
-            return BoardState.NONE;
+            if (computerMove() != null) {
+                tile.clearValue();
+                continue;
+            } else {
+                tile.clearValue();
+            }
         }
+        return 0;
+    }
+
+    private boolean checkWinner() {
+        return combos.stream()
+                .anyMatch(Combo::isComplete);
     }
 
     private Pair<Integer, Integer> findRandomMove() {

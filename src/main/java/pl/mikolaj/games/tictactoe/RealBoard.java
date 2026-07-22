@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Random;
 
 public class RealBoard extends AbstractBoard<RealBoard.RealTile> {
+    protected static final int TILE_SIZE = 100;
+
     private Pane root;
     private boolean playable = true;
-    private boolean turnX = true;
+    private boolean playerTurn = true;
 
     protected void init(Pane root) {
         this.root = root;
@@ -64,14 +66,16 @@ public class RealBoard extends AbstractBoard<RealBoard.RealTile> {
         RealTile tile = findBestMove();
         tile.setValue(COMPUTER_SYMBOL);
         checkState();
-        turnX = true;
+        playerTurn = true;
     }
 
     private RealTile findBestMove() {
         VirtualBoard virtualBoard = new VirtualBoard();
         virtualBoard.init(tiles);
-        Pair<Integer, Integer> bestMove = virtualBoard.findBestMove();
-        return tiles[bestMove.getLeft()][bestMove.getRight()];
+        Pair<Integer, Integer> bestMove = virtualBoard.computerMove();
+        System.out.println("Best Move: " + bestMove);
+
+        return bestMove == null ? findRandomFreeTile() : tiles[bestMove.getLeft()][bestMove.getRight()];
     }
 
     private RealTile findRandomFreeTile() {
@@ -119,10 +123,10 @@ public class RealBoard extends AbstractBoard<RealBoard.RealTile> {
                     return;
                 }
 
-                if (turnX && isEmpty() && event.getButton() == MouseButton.PRIMARY) {
+                if (playerTurn && isEmpty() && event.getButton() == MouseButton.PRIMARY) {
                     setValue(PLAYER_SYMBOL);
                     checkState();
-                    turnX = false;
+                    playerTurn = false;
                     computerMove();
                 }
             });

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbstractBoard<T extends AbstractBoard.AbstractTile> {
-    protected static final int TILE_SIZE = 100;
     protected static final int BOARD_SIZE = 3;
     protected static final String PLAYER_SYMBOL = "X";
     protected static final String COMPUTER_SYMBOL = "O";
@@ -61,10 +60,6 @@ public abstract class AbstractBoard<T extends AbstractBoard.AbstractTile> {
                 .flatMap(Arrays::stream)
                 .filter(T::isEmpty)
                 .toList();
-    }
-
-    protected enum BoardState {
-        NONE, X_WON, O_WON, DRAW
     }
 
     protected class Combo {
