@@ -14,6 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Random;
@@ -50,7 +51,7 @@ public class RealBoard extends AbstractBoard<RealBoard.RealTile> {
     }
 
     private void checkForDraw() {
-        if (isDraw(tiles)) {
+        if (isDraw()) {
             playable = false;
             System.out.println("It's a Draw!");
         }
@@ -60,14 +61,21 @@ public class RealBoard extends AbstractBoard<RealBoard.RealTile> {
         if (!playable) {
             return;
         }
-        RealTile tile = findRandomFreeTile();
+        RealTile tile = findBestMove();
         tile.setValue(COMPUTER_SYMBOL);
         checkState();
         turnX = true;
     }
 
+    private RealTile findBestMove() {
+        VirtualBoard virtualBoard = new VirtualBoard();
+        virtualBoard.init(tiles);
+        Pair<Integer, Integer> bestMove = virtualBoard.findBestMove();
+        return tiles[bestMove.getLeft()][bestMove.getRight()];
+    }
+
     private RealTile findRandomFreeTile() {
-        List<RealTile> emptyTiles = getEmptyTiles(tiles);
+        List<RealTile> emptyTiles = getEmptyTiles();
         Random random = new Random();
         int next = random.nextInt(emptyTiles.size());
         return emptyTiles.get(next);

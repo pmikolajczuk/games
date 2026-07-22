@@ -52,15 +52,19 @@ public abstract class AbstractBoard<T extends AbstractBoard.AbstractTile> {
         return new Combo(diagonal);
     }
 
-    protected boolean isDraw(T[][] tiles) {
-        return getEmptyTiles(tiles).isEmpty();
+    protected boolean isDraw() {
+        return getEmptyTiles().isEmpty();
     }
 
-    protected List<T> getEmptyTiles(T[][] tiles) {
+    protected List<T> getEmptyTiles() {
         return Arrays.stream(tiles)
                 .flatMap(Arrays::stream)
                 .filter(T::isEmpty)
                 .toList();
+    }
+
+    protected enum BoardState {
+        NONE, X_WON, O_WON, DRAW
     }
 
     protected class Combo {
