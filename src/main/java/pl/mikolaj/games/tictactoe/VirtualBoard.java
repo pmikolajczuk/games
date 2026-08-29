@@ -12,40 +12,24 @@ public class VirtualBoard extends AbstractBoard<VirtualBoard.VirtualTile> {
     }
 
     public Pair<Integer, Integer> computerMove() {
-        for (VirtualTile tile : getEmptyTiles()) {
-            tile.setValue(COMPUTER_SYMBOL);
-            if (checkWinner() || isDraw()) {
-                tile.clearValue();
-                return Pair.of(tile.getY(), tile.getX());
-            }
-
-            if (playerMove() == 1) {
-                tile.clearValue();
-                continue;
-            } else {
-                tile.clearValue();
+        // Check if computer can win in the next move
+        for (Combo combo : combos) {
+            if (combo.canWin(COMPUTER_SYMBOL)) {
+                VirtualTile tile = combo.getEmptyTile();
                 return Pair.of(tile.getY(), tile.getX());
             }
         }
-        return null;
-    }
 
-    private int playerMove() {
-        for (VirtualTile tile : getEmptyTiles()) {
-            tile.setValue(PLAYER_SYMBOL);
-            if (checkWinner()) {
-                tile.clearValue();
-                return 1;
-            }
-
-            if (computerMove() != null) {
-                tile.clearValue();
-                continue;
-            } else {
-                tile.clearValue();
+        // Check if player can win in the next move and block them
+        for (Combo combo : combos) {
+            if (combo.canWin(PLAYER_SYMBOL)) {
+                VirtualTile tile = combo.getEmptyTile();
+                return Pair.of(tile.getY(), tile.getX());
             }
         }
-        return 0;
+
+        // Otherwise, make a random move
+        return findRandomMove();
     }
 
     private boolean checkWinner() {

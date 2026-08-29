@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbstractBoard<T extends AbstractBoard.AbstractTile> {
-    protected static final int BOARD_SIZE = 3;
+    protected static final int BOARD_SIZE = 4;
     protected static final String PLAYER_SYMBOL = "X";
     protected static final String COMPUTER_SYMBOL = "O";
 
@@ -85,6 +85,20 @@ public abstract class AbstractBoard<T extends AbstractBoard.AbstractTile> {
 
         public String getWinnerSymbol() {
             return tiles.getFirst().getValue();
+        }
+
+        public boolean canWin(String symbol) {
+            long count = tiles.stream()
+                    .filter(tile -> tile.getValue().equals(symbol))
+                    .count();
+            return count == BOARD_SIZE - 1 && tiles.stream().anyMatch(AbstractTile::isEmpty);
+        }
+
+        public T getEmptyTile() {
+            return tiles.stream()
+                    .filter(AbstractTile::isEmpty)
+                    .findFirst()
+                    .orElse(null);
         }
     }
 
